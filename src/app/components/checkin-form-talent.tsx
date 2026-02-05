@@ -1607,35 +1607,6 @@ ${notifications.emailTalent.body}
                   </TooltipContent>
                 </Tooltip>
               </div>
-              
-              {/* Bouton Modèle d'email */}
-              <Button
-                onClick={() => setShowEmailTemplate(true)}
-                type="button"
-                style={{
-                  backgroundColor: 'transparent',
-                  color: TalioTheme.colors.primary,
-                  border: `1px solid ${TalioTheme.colors.primary}`,
-                  padding: '10px 16px',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = TalioTheme.colors.primaryLight;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
-              >
-                <Mail size={16} />
-                Modèle d'email
-              </Button>
             </div>
 
             <div 
