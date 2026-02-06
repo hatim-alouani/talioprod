@@ -16,7 +16,7 @@ function J14TalentContent() {
     talent_id: searchParams.get('talent_id') || '',
     talent_full_name: searchParams.get('talent_full_name') || '[Nom du Talent]',
     talent_email: searchParams.get('talent_email') || '',
-    account_manager_full_name: searchParams.get('account_manager_full_name') || 'Mehdi',
+    account_manager_full_name: searchParams.get('account_manager_full_name') || '[Nom du Manager]',
     account_manager_email: searchParams.get('account_manager_email') || '',
     calendly_link: searchParams.get('calendly_link') || 'https://calendly.com/alouanihatim01/30min',
     billing_period_start: searchParams.get('billing_period_start') || '',

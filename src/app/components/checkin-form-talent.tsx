@@ -12,6 +12,15 @@ import { EmailTemplateModalTalent } from "@/app/components/email-template-modal-
 import { TalioTheme } from "@/config/talio-theme";
 import { CheckInFormStyles } from "@/styles/checkin-form-styles";
 
+// Calendly type declaration
+declare global {
+  interface Window {
+    Calendly?: {
+      initPopupWidget: (options: { url: string }) => void;
+    };
+  }
+}
+
 interface NotificationPreview {
   type: "critical" | "warning" | "upsell" | "all-good";
   slackMessage: string;
@@ -48,6 +57,7 @@ interface UrlParams {
   contract_end_date: string;
   jx: string;
   jshow: string;
+  hidden?: string;
 }
 
 interface CheckInFormTalentProps {
@@ -76,6 +86,8 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
   const [riskDetails, setRiskDetails] = useState("");
   const [improvementAreas, setImprovementAreas] = useState("");
   const [needCall, setNeedCall] = useState("non");
+  const [calendlyBooked, setCalendlyBooked] = useState(false);
+  const [showCalendlyWarning, setShowCalendlyWarning] = useState(false);
   const [openFeedback, setOpenFeedback] = useState("");
   const [successStory, setSuccessStory] = useState("");
   
@@ -91,6 +103,39 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
       setFormLink(window.location.href);
     }
   }, []);
+
+  // Load Calendly widget script
+  useEffect(() => {
+    // Add Calendly CSS
+    const link = document.createElement('link');
+    link.href = 'https://assets.calendly.com/assets/external/widget.css';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+
+    // Add Calendly script
+    const script = document.createElement('script');
+    script.src = 'https://assets.calendly.com/assets/external/widget.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+      if (document.head.contains(link)) {
+        document.head.removeChild(link);
+      }
+    };
+  }, []);
+
+  // Reset booking status when needCall changes
+  useEffect(() => {
+    if (needCall === "non") {
+      setCalendlyBooked(false);
+      setShowCalendlyWarning(false);
+    }
+  }, [needCall]);
+
   const [formSubmitted, setFormSubmitted] = useState(false);
 
   // Handlers avec réinitialisation automatique
@@ -189,9 +234,9 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
 
   const generateNotifications = (formData: any): NotificationPreview => {
     const triggerType = getTriggerType();
-    const talentName = urlParams?.talent_full_name || "Nadia Berrada";
-    const companyName = urlParams?.company_name || "Acme Corp";
-    const amName = urlParams?.account_manager_full_name || "Mehdi";
+    const talentName = urlParams?.talent_full_name || "[Nom du Talent]";
+    const companyName = urlParams?.company_name || "[Entreprise]";
+    const amName = urlParams?.account_manager_full_name || "[Nom du Manager]";
     const calendlyLink = urlParams?.calendly_link || "https://calendly.com/alouanihatim01/30min";
 
     // Détection des red flags
@@ -509,8 +554,8 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                   Nous restons à votre disposition pour faciliter cette collaboration. N'hésitez pas si vous souhaitez
                   un point avec nous.
                 </p>
-                <p style="margin:0 0 14px 0;">Merci pour votre confiance,</p>
-                <p style="margin:0 0 4px 0;"><strong>${amName}</strong> — Talio</p>
+                <p style="margin:0 0 8px 0;">Cordialement,</p>
+                <p style="margin:0 0 4px 0;"><strong>L'équipe Talio</strong></p>
                 <p style="margin:0;color:#6b7280;">csm@taliotalent.com</p>
               </div>
             </td>
@@ -575,10 +620,9 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                     </td>
                   </tr>
                 </table>` : ''}
-                <p style="margin:0 0 16px 0;">Courage et à très vite,</p>
-                <p style="margin:0 0 4px 0;"><strong>${amName}</strong> — Talio</p>
-                <p style="margin:0 0 6px 0;color:#6b7280;font-size:14px;">csm@taliotalent.com</p>
-                <p style="margin:0;color:#6b7280;font-size:14px;">www.taliotalent.com</p>
+                <p style="margin:0 0 8px 0;">Cordialement,</p>
+                <p style="margin:0 0 4px 0;"><strong>L'équipe Talio</strong></p>
+                <p style="margin:0;color:#6b7280;font-size:14px;">csm@taliotalent.com</p>
               </div>
             </td>
           </tr>
@@ -781,8 +825,8 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                     </td>
                   </tr>
                 </table>
-                <p style="margin:0 0 16px 0;">Ravi de voir cette collaboration démarrer sur de bonnes bases !</p>
-                <p style="margin:0 0 4px 0;"><strong>${amName}</strong> — Talio</p>
+                <p style="margin:0 0 8px 0;">Cordialement,</p>
+                <p style="margin:0 0 4px 0;"><strong>L'équipe Talio</strong></p>
                 <p style="margin:0;color:#6b7280;">csm@taliotalent.com</p>
               </div>
             </td>
@@ -824,10 +868,9 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                 <p style="margin:0 0 16px 0;">
                   Je reviens vers toi prochainement pour en discuter.
                 </p>
-                <p style="margin:0 0 16px 0;">Continue comme ça ! 💪</p>
-                <p style="margin:0 0 4px 0;"><strong>${amName}</strong> — Talio</p>
-                <p style="margin:0 0 6px 0;color:#6b7280;font-size:14px;">csm@taliotalent.com</p>
-                <p style="margin:0;color:#6b7280;font-size:14px;">www.taliotalent.com</p>
+                <p style="margin:0 0 8px 0;">Cordialement,</p>
+                <p style="margin:0 0 4px 0;"><strong>L'équipe Talio</strong></p>
+                <p style="margin:0;color:#6b7280;font-size:14px;">csm@taliotalent.com</p>
               </div>
             </td>
           </tr>
@@ -1069,7 +1112,8 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                   Rien d'alarmant, juste des ajustements classiques de démarrage. N'hésitez pas si vous souhaitez
                   échanger avec nous.
                 </p>
-                <p style="margin:0 0 4px 0;"><strong>${amName}</strong> — Talio</p>
+                <p style="margin:0 0 8px 0;">Cordialement,</p>
+                <p style="margin:0 0 4px 0;"><strong>L'équipe Talio</strong></p>
                 <p style="margin:0;color:#6b7280;">csm@taliotalent.com</p>
               </div>
             </td>
@@ -1126,10 +1170,9 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                 <p style="margin:0 0 16px 0;">
                   N'hésite pas à me tenir au courant si d'autres points émergent.
                 </p>
-                <p style="margin:0 0 16px 0;">À très vite,</p>
-                <p style="margin:0 0 4px 0;"><strong>${amName}</strong> — Talio</p>
-                <p style="margin:0 0 6px 0;color:#6b7280;font-size:14px;">csm@taliotalent.com</p>
-                <p style="margin:0;color:#6b7280;font-size:14px;">www.taliotalent.com</p>
+                <p style="margin:0 0 8px 0;">Cordialement,</p>
+                <p style="margin:0 0 4px 0;"><strong>L'équipe Talio</strong></p>
+                <p style="margin:0;color:#6b7280;font-size:14px;">csm@taliotalent.com</p>
               </div>
             </td>
           </tr>
@@ -1360,10 +1403,9 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                 <p style="margin:0 0 16px 0;">
                   On reste dispo si tu as besoin, et on se recontacte dans quelques semaines pour le prochain check-in.
                 </p>
-                <p style="margin:0 0 16px 0;">Keep rocking! 🎸</p>
-                <p style="margin:0 0 4px 0;"><strong>${amName}</strong> — Talio</p>
-                <p style="margin:0 0 6px 0;color:#6b7280;font-size:14px;">csm@taliotalent.com</p>
-                <p style="margin:0;color:#6b7280;font-size:14px;">www.taliotalent.com</p>
+                <p style="margin:0 0 8px 0;">Cordialement,</p>
+                <p style="margin:0 0 4px 0;"><strong>L'équipe Talio</strong></p>
+                <p style="margin:0;color:#6b7280;font-size:14px;">csm@taliotalent.com</p>
               </div>
             </td>
           </tr>
@@ -1379,6 +1421,17 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation for Calendly booking requirement
+    if (needCall === "oui" && !calendlyBooked) {
+      setShowCalendlyWarning(true);
+      // Scroll to the call section
+      const callSection = document.getElementById('call-preference-section');
+      if (callSection) {
+        callSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
     
     // Validation
     if (parseInt(overallFeeling) <= 2 && !detailsFeeling.trim()) {
@@ -1494,7 +1547,7 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
 
 TYPE: ${notifications.type.toUpperCase()}
 
---- SLACK (MEHDI) ---
+--- SLACK ([Nom du Manager]) ---
 ${notifications.slackMessage}
 
 --- EMAIL ACCOUNT MANAGER ---
@@ -1541,6 +1594,56 @@ ${notifications.emailTalent.body}
     setTimeout(() => setCopiedState(null), 2000);
   };
 
+  // Check access - hidden parameter must be present
+  if (!urlParams?.hidden) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA]" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <div className="max-w-[600px] mx-auto px-4 py-12">
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+            <div 
+              className="mb-6 p-8 rounded-2xl"
+              style={{
+                backgroundColor: 'white',
+                border: `1px solid ${TalioTheme.colors.error}20`,
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
+              }}
+            >
+              <div 
+                className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center"
+                style={{
+                  backgroundColor: `${TalioTheme.colors.error}10`
+                }}
+              >
+                <AlertCircle 
+                  size={40} 
+                  style={{ color: TalioTheme.colors.error }} 
+                />
+              </div>
+              <h1 
+                className="text-2xl font-bold mb-3"
+                style={{ color: TalioTheme.colors.textPrimary }}
+              >
+                Accès refusé
+              </h1>
+              <p 
+                className="text-base mb-2"
+                style={{ color: TalioTheme.colors.textSecondary }}
+              >
+                Vous n'avez pas l'autorisation d'accéder à ce formulaire.
+              </p>
+              <p 
+                className="text-sm"
+                style={{ color: TalioTheme.colors.textMuted }}
+              >
+                Veuillez utiliser le lien fourni dans votre invitation.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <TooltipProvider delayDuration={200}>
       <div className="min-h-screen bg-[#FAFAFA]" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -1561,7 +1664,7 @@ ${notifications.emailTalent.body}
                 fontWeight: 500, 
                 color: TalioTheme.colors.primary 
               }}>
-                👤 Nadia Berrada
+                👤 {urlParams?.talent_full_name || '[Nom du Talent]'}
               </span>
               <span style={{ 
                 fontSize: '13px', 
@@ -1574,7 +1677,7 @@ ${notifications.emailTalent.body}
                 fontWeight: 500, 
                 color: TalioTheme.colors.textPrimary 
               }}>
-                Acme Corp
+                {urlParams?.company_name || '[Entreprise]'}
               </span>
             </div>
 
@@ -1622,7 +1725,7 @@ ${notifications.emailTalent.body}
               }}
             >
               Hey ! 👋 Petit check rapide pour s'assurer que tout roule avec{" "}
-              <span style={{ fontWeight: 600, color: TalioTheme.colors.primary }}>Acme Corp</span>. Ce formulaire prend <strong>2 min</strong> et permet à Mehdi d'intervenir vite si besoin. Tes réponses restent entre nous 🤝
+              <span style={{ fontWeight: 600, color: TalioTheme.colors.primary }}>{urlParams?.company_name || '[Entreprise]'}</span>. Ce formulaire prend <strong>2 min</strong> et permet à {urlParams?.account_manager_full_name || '[Nom du Manager]'} d'intervenir vite si besoin. Tes réponses restent entre nous 🤝
             </div>
 
             {/* Alerte critique si problème détecté */}
@@ -1640,7 +1743,7 @@ ${notifications.emailTalent.body}
                 >
                   <AlertCircle size={20} style={{ color: '#FF9900', flexShrink: 0, marginTop: '2px' }} />
                   <div style={{ fontSize: '14px', color: '#856404' }}>
-                    <strong>⚠️ Point d'attention critique détecté</strong> - Mehdi prendra contact rapidement pour résoudre la situation. Un call est fortement recommandé.
+                    <strong>⚠️ Point d'attention critique détecté</strong> - {urlParams?.account_manager_full_name || '[Nom du Manager]'} prendra contact rapidement pour résoudre la situation. Un call est fortement recommandé.
                   </div>
                 </motion.div>
               )}
@@ -1791,7 +1894,7 @@ ${notifications.emailTalent.body}
                               Call recommandé
                             </p>
                             <p style={{ fontSize: '12px', color: '#856404', margin: 0 }}>
-                              Un point avec Mehdi est fortement conseillé pour débloquer la situation.
+                              Un point avec {urlParams?.account_manager_full_name || '[Nom du Manager]'} est fortement conseillé pour débloquer la situation.
                             </p>
                           </div>
                         </div>
@@ -2669,6 +2772,22 @@ ${notifications.emailTalent.body}
                     }}
                   />
                 </div>
+              </section>
+
+              {/* Section 7 : Préférence de suivi */}
+              <section id="call-preference-section">
+                <h2 
+                  className="mb-6" 
+                  style={{ 
+                    fontSize: '20px', 
+                    fontWeight: 600, 
+                    color: '#111111',
+                    borderBottom: '2px solid #0055FF',
+                    paddingBottom: '12px'
+                  }}
+                >
+                  Préférence de suivi
+                </h2>
 
                 {/* Besoin d'un call */}
                 <div 
@@ -2689,7 +2808,7 @@ ${notifications.emailTalent.body}
                         margin: 0
                       }}
                     >
-                      Souhaites-tu un échange avec ton Account Manager (Mehdi) ?
+                      Souhaites-tu un échange avec ton Account Manager ({urlParams?.account_manager_full_name || '[Nom du Manager]'}) ?
                     </Label>
                   </div>
                   <RadioGroup
@@ -2736,24 +2855,66 @@ ${notifications.emailTalent.body}
                         transition={{ duration: 0.3 }}
                         style={{ overflow: "hidden" }}
                       >
-                        <a
-                          href="https://calendly.com/mehdi-talio/check-in-talent"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-2 rounded-lg p-4 transition-shadow hover:shadow-md"
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCalendlyBooked(true);
+                            setShowCalendlyWarning(false);
+                            // @ts-ignore - Calendly is loaded via script
+                            if (window.Calendly) {
+                              // @ts-ignore
+                              window.Calendly.initPopupWidget({
+                                url: urlParams?.calendly_link || 'https://calendly.com/alouanihatim01/30min'
+                              });
+                            }
+                          }}
+                          className="flex items-center justify-center gap-2 rounded-lg p-4 transition-shadow hover:shadow-md w-full"
                           style={{
-                            backgroundColor: '#E8F0FE',
-                            border: '2px solid #0055FF',
-                            color: '#0055FF',
+                            backgroundColor: calendlyBooked ? '#10b981' : '#E8F0FE',
+                            border: calendlyBooked ? '2px solid #059669' : '2px solid #0055FF',
+                            color: calendlyBooked ? '#FFFFFF' : '#0055FF',
                             textDecoration: 'none',
                             fontSize: '14px',
                             fontWeight: 600,
-                            marginTop: '16px'
+                            marginTop: '16px',
+                            cursor: 'pointer'
                           }}
                         >
-                          <Calendar size={18} />
-                          Réserver un créneau avec Mehdi (15 min)
-                        </a>
+                          {calendlyBooked ? (
+                            <>
+                              <Check size={18} />
+                              Créneau réservé ✓
+                            </>
+                          ) : (
+                            <>
+                              <Calendar size={18} />
+                              Réserver un créneau avec {urlParams?.account_manager_full_name || '[Nom du Manager]'} (15 min)
+                            </>
+                          )}
+                        </button>
+
+                        {/* Warning message */}
+                        <AnimatePresence>
+                          {showCalendlyWarning && !calendlyBooked && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="flex items-start gap-2 rounded-lg p-3"
+                              style={{
+                                backgroundColor: '#fef2f2',
+                                border: '1px solid #fca5a5',
+                                marginTop: '12px'
+                              }}
+                            >
+                              <AlertCircle size={18} style={{ color: '#dc2626', flexShrink: 0, marginTop: '2px' }} />
+                              <span style={{ fontSize: '14px', color: '#dc2626', fontWeight: 500 }}>
+                                Veuillez réserver un créneau avec {urlParams?.account_manager_full_name || '[Nom du Manager]'} avant d'envoyer le formulaire.
+                              </span>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -2831,7 +2992,7 @@ ${notifications.emailTalent.body}
                     flex: 1
                   }}
                 >
-                  Envoyer mon check-in
+                  Envoyer mon feedback
                 </Button>
                 <Button
                   type="button"
@@ -2900,9 +3061,9 @@ ${notifications.emailTalent.body}
                       color: '#555555',
                       margin: 0
                     }}>
-                      {notifications?.type === "critical" && "Mehdi va te contacter sous 24h"}
-                      {notifications?.type === "warning" && "Mehdi va te contacter sous 48h"}
-                      {notifications?.type === "upsell" && "Mehdi reviendra vers toi prochainement"}
+                      {notifications?.type === "critical" && `${urlParams?.account_manager_full_name || '[Nom du Manager]'} va te contacter sous 24h`}
+                      {notifications?.type === "warning" && `${urlParams?.account_manager_full_name || '[Nom du Manager]'} va te contacter sous 48h`}
+                      {notifications?.type === "upsell" && `${urlParams?.account_manager_full_name || '[Nom du Manager]'} reviendra vers toi prochainement`}
                       {notifications?.type === "all-good" && "Continue comme ça ! On se reparle bientôt."}
                     </p>
                   </div>
@@ -2922,13 +3083,13 @@ ${notifications.emailTalent.body}
                     <PhoneCall size={20} style={{ color: TalioTheme.colors.primary, flexShrink: 0, marginTop: '2px' }} />
                     <div style={{ flex: 1 }}>
                       <p style={{ fontWeight: 600, color: '#111111', margin: 0, marginBottom: '8px', fontSize: '14px' }}>
-                        Prends RDV avec Mehdi
+                        Prends RDV avec {urlParams?.account_manager_full_name || '[Nom du Manager]'}
                       </p>
                       <p style={{ fontSize: '13px', color: '#555555', margin: 0, marginBottom: '12px' }}>
                         Tu as demandé un échange — choisis ton créneau :
                       </p>
                       <Button
-                        onClick={() => window.open('https://calendly.com/mehdi-talio/30min', '_blank')}
+                        onClick={() => window.open('https://calendly.com/[Nom du Manager]-talio/30min', '_blank')}
                         style={{
                           backgroundColor: TalioTheme.colors.primary,
                           color: '#FFFFFF',
@@ -3053,7 +3214,7 @@ ${notifications.emailTalent.body}
                     <div className="flex items-center gap-2">
                       <Mail size={16} style={{ color: TalioTheme.colors.primary }} />
                       <span style={{ fontSize: '14px', fontWeight: 600, color: '#111111' }}>
-                        Email → Mehdi (Account Manager)
+                        Email → [Nom du Manager] (Account Manager)
                       </span>
                     </div>
                     <Button
@@ -3151,7 +3312,7 @@ ${notifications.emailTalent.body}
                     <div className="flex items-center gap-2">
                       <Mail size={16} style={{ color: '#4CAF50' }} />
                       <span style={{ fontSize: '14px', fontWeight: 600, color: '#111111' }}>
-                        Email → Nadia Berrada (Talent)
+                        Email → {urlParams?.talent_full_name || "[Nom du Talent]"} (Talent)
                       </span>
                     </div>
                     <Button
@@ -3226,7 +3387,7 @@ ${notifications.emailTalent.body}
             onClose={() => setShowEmailTemplate(false)}
             talentName={urlParams?.talent_full_name || "[Nom du Talent]"}
             formLink={formLink}
-            amName={urlParams?.account_manager_full_name || "Mehdi"}
+            amName={urlParams?.account_manager_full_name || "[Nom du Manager]"}
           />
         )}
 
@@ -3238,78 +3399,234 @@ ${notifications.emailTalent.body}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+              onClick={() => setFormSubmitted(false)}
             >
               <motion.div
-                initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.8, opacity: 0, y: 20 }}
-                className="bg-white rounded-2xl p-8 max-w-md w-full text-center"
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-2xl max-w-lg w-full text-center relative overflow-hidden"
                 style={{
-                  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
                 }}
               >
-                {/* Icône de succès animée */}
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                  className="mb-6 flex justify-center"
-                >
-                  <div 
-                    className="rounded-full flex items-center justify-center"
-                    style={{
-                      width: '80px',
-                      height: '80px',
-                      backgroundColor: '#E8F5E9',
-                      border: '4px solid #10B981'
-                    }}
-                  >
-                    <Check size={48} style={{ color: '#10B981' }} />
-                  </div>
-                </motion.div>
-
-                {/* Message principal */}
-                <h2 style={{ 
-                  fontSize: '24px', 
-                  fontWeight: 700, 
-                  color: '#111111',
-                  marginBottom: '12px'
-                }}>
-                  Merci ! 🎉
-                </h2>
-                
-                <p style={{ 
-                  fontSize: '16px', 
-                  color: '#555555',
-                  marginBottom: '8px',
-                  lineHeight: '1.5'
-                }}>
-                  Ton check-in a bien été enregistré.
-                </p>
-                
-                <p style={{ 
-                  fontSize: '14px', 
-                  color: '#777777',
-                  marginBottom: '24px',
-                  lineHeight: '1.5'
-                }}>
-                  {urlParams?.account_manager_full_name || "Ton AM"} te contactera d'ici <strong style={{ color: '#0055FF' }}>mercredi prochain (J+2)</strong> pour assurer le suivi.
-                </p>
-
-                {/* SLA Badge */}
+                {/* Header avec gradient */}
                 <div 
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4"
                   style={{
-                    backgroundColor: '#E8F0FE',
-                    border: '1px solid #0055FF20'
+                    background: 'linear-gradient(135deg, #0055FF 0%, #00CC88 100%)',
+                    padding: '32px 24px',
+                    position: 'relative'
                   }}
                 >
-                  <span style={{ fontSize: '14px', fontWeight: 500, color: '#0055FF' }}>
-                    ⚡ SLA Talio : Réponse garantie sous 48h
-                  </span>
+                  {/* Close button */}
+                  <button
+                    onClick={() => setFormSubmitted(false)}
+                    style={{
+                      position: 'absolute',
+                      top: '16px',
+                      right: '16px',
+                      background: 'rgba(255, 255, 255, 0.2)',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '32px',
+                      height: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
+                  >
+                    <X size={20} style={{ color: '#FFFFFF' }} />
+                  </button>
+
+                  {/* Icône de succès animée */}
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                    className="flex justify-center mb-4"
+                  >
+                    <div 
+                      className="rounded-full flex items-center justify-center"
+                      style={{
+                        width: '80px',
+                        height: '80px',
+                        backgroundColor: '#FFFFFF',
+                        boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)'
+                      }}
+                    >
+                      <Check size={48} style={{ color: '#00CC88', strokeWidth: 3 }} />
+                    </div>
+                  </motion.div>
+
+                  {/* Titre */}
+                  <h2 style={{ 
+                    fontSize: '28px', 
+                    fontWeight: 700, 
+                    color: '#FFFFFF',
+                    marginBottom: '8px',
+                    letterSpacing: '-0.5px'
+                  }}>
+                    Check-in enregistré ! 🎉
+                  </h2>
+                  
+                  <p style={{ 
+                    fontSize: '16px', 
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    lineHeight: '1.5'
+                  }}>
+                    Merci pour ton retour {urlParams?.talent_full_name?.split(' ')[0] || ''}
+                  </p>
                 </div>
 
+                {/* Contenu principal */}
+                <div style={{ padding: '32px 24px' }}>
+                  {/* Section Prochaines étapes */}
+                  <div style={{ marginBottom: '24px', textAlign: 'left' }}>
+                    <h3 style={{
+                      fontSize: '16px',
+                      fontWeight: 600,
+                      color: '#111111',
+                      marginBottom: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        backgroundColor: '#E8F0FE',
+                        color: '#0055FF',
+                        fontSize: '14px',
+                        fontWeight: 700
+                      }}>✓</span>
+                      Prochaines étapes
+                    </h3>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {/* Étape 1 */}
+                      <div style={{
+                        display: 'flex',
+                        gap: '12px',
+                        alignItems: 'flex-start',
+                        padding: '12px',
+                        backgroundColor: '#F8FAFC',
+                        borderRadius: '8px',
+                        border: '1px solid #E0E0E0'
+                      }}>
+                        <span style={{ fontSize: '20px', lineHeight: '1' }}>📧</span>
+                        <div style={{ flex: 1, textAlign: 'left' }}>
+                          <p style={{ fontSize: '14px', fontWeight: 600, color: '#111111', margin: '0 0 4px 0' }}>
+                            Confirmation par email
+                          </p>
+                          <p style={{ fontSize: '13px', color: '#666666', margin: 0, lineHeight: '1.4' }}>
+                            Tu vas recevoir un email de confirmation dans quelques minutes
+                          </p>
+                        </div>
+                      </div>
 
+                      {needCall === "oui" && (
+                        <div style={{
+                          display: 'flex',
+                          gap: '12px',
+                          alignItems: 'flex-start',
+                          padding: '12px',
+                          backgroundColor: '#E8F0FE',
+                          borderRadius: '8px',
+                          border: '1px solid #0055FF'
+                        }}>
+                          <span style={{ fontSize: '20px', lineHeight: '1' }}>📞</span>
+                          <div style={{ flex: 1, textAlign: 'left' }}>
+                            <p style={{ fontSize: '14px', fontWeight: 600, color: '#0055FF', margin: '0 0 4px 0' }}>
+                              Call programmé
+                            </p>
+                            <p style={{ fontSize: '13px', color: '#0055FF', margin: 0, lineHeight: '1.4' }}>
+                              {urlParams?.account_manager_full_name || 'Ton AM'} te contactera selon le créneau réservé
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Étape 2 */}
+                      <div style={{
+                        display: 'flex',
+                        gap: '12px',
+                        alignItems: 'flex-start',
+                        padding: '12px',
+                        backgroundColor: '#F8FAFC',
+                        borderRadius: '8px',
+                        border: '1px solid #E0E0E0'
+                      }}>
+                        <span style={{ fontSize: '20px', lineHeight: '1' }}>⏰</span>
+                        <div style={{ flex: 1, textAlign: 'left' }}>
+                          <p style={{ fontSize: '14px', fontWeight: 600, color: '#111111', margin: '0 0 4px 0' }}>
+                            Suivi sous 48h max
+                          </p>
+                          <p style={{ fontSize: '13px', color: '#666666', margin: 0, lineHeight: '1.4' }}>
+                            {urlParams?.account_manager_full_name || 'Ton AM'} reviendra vers toi d'ici <strong style={{ color: '#0055FF' }}>mercredi prochain</strong>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Badge SLA */}
+                  <div 
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 16px',
+                      borderRadius: '100px',
+                      backgroundColor: '#FFF7ED',
+                      border: '1px solid #FED7AA',
+                      marginBottom: '24px'
+                    }}
+                  >
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#EA580C' }}>
+                      ⚡ SLA Talio : Réponse garantie sous 48h
+                    </span>
+                  </div>
+
+                  {/* Bouton de fermeture */}
+                  <button
+                    onClick={() => setFormSubmitted(false)}
+                    style={{
+                      width: '100%',
+                      padding: '14px 24px',
+                      backgroundColor: '#0055FF',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '15px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      boxShadow: '0 4px 6px rgba(0, 85, 255, 0.2)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#0044CC';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 6px 12px rgba(0, 85, 255, 0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#0055FF';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 85, 255, 0.2)';
+                    }}
+                  >
+                    Fermer
+                  </button>
+                </div>
               </motion.div>
             </motion.div>
           )}

@@ -40,7 +40,7 @@ Quelques questions simples sur :
 • L'engagement et la première livraison
 
 💡 **Pourquoi c'est important ?**
-Ce retour nous permet d'ajuster rapidement si nécessaire et de vous garantir le meilleur ROI sur cette collaboration. Mehdi suit personnellement chaque expérience internationale et peut débloquer toute situation en 24-48h.
+Ce retour nous permet d'ajuster rapidement si nécessaire et de vous garantir le meilleur ROI sur cette collaboration. [Nom du Manager] suit personnellement chaque expérience internationale et peut débloquer toute situation en 24-48h.
 
 **Vos réponses restent confidentielles** et nous permettent d'améliorer continuellement l'expérience pour vous et ${talentName}.
 
@@ -54,7 +54,7 @@ www.taliotalent.com
 
 ---
 
-P.S. : En cas de question ou si vous préférez échanger de vive voix, n'hésitez pas à réserver un créneau avec Mehdi : https://calendly.com/alouanihatim01/30min`;
+P.S. : En cas de question ou si vous préférez échanger de vive voix, n'hésitez pas à réserver un créneau avec [Nom du Manager] : https://calendly.com/alouanihatim01/30min`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(emailTemplate);
