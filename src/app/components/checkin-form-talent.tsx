@@ -57,7 +57,6 @@ interface UrlParams {
   contract_end_date: string;
   jx: string;
   jshow: string;
-  hidden?: string;
 }
 
 interface CheckInFormTalentProps {
@@ -1594,8 +1593,9 @@ ${notifications.emailTalent.body}
     setTimeout(() => setCopiedState(null), 2000);
   };
 
-  // Check access - hidden parameter must be present
-  if (!urlParams?.hidden) {
+  // Check access - essential URL parameters must be present
+  const hasRequiredParams = urlParams?.contract_id && urlParams?.talent_id && urlParams?.company_id;
+  if (!hasRequiredParams) {
     return (
       <div className="min-h-screen bg-[#FAFAFA]" style={{ fontFamily: 'Inter, sans-serif' }}>
         <div className="max-w-[600px] mx-auto px-4 py-12">

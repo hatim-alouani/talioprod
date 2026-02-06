@@ -15,6 +15,10 @@ import { CheckInFormStyles } from "@/styles/checkin-form-styles";
 interface NotificationPreview {
   type: "at-risk" | "upsell" | "call-programmed" | "check-in-ok";
   slackMessage: string;
+  emailAM: {
+    subject: string;
+    body: string;
+  };
   emailEntreprise: {
     subject: string;
     body: string;
@@ -44,7 +48,6 @@ interface UrlParams {
   contract_end_date: string;
   jx: string;
   jshow: string;
-  hidden?: string;
 }
 
 interface CheckInFormProps {
@@ -200,9 +203,19 @@ export function CheckInForm({ urlParams, webhookUrl }: CheckInFormProps = {}) {
     const calendlyLink = urlParams?.calendly_link || "https://calendly.com/alouanihatim01/30min";
     const accountManagerName = urlParams?.account_manager_full_name || "[Account Manager]";
     
-    // Calculer J+2 pour les dates de réponse
+    // Calculer J+2 pour les dates de réponse (en sautant les week-ends)
     const responseDate = new Date();
-    responseDate.setDate(responseDate.getDate() + 2);
+    let businessDaysToAdd = 2;
+    
+    while (businessDaysToAdd > 0) {
+      responseDate.setDate(responseDate.getDate() + 1);
+      const dayOfWeek = responseDate.getDay();
+      // Skip weekends (0 = Sunday, 6 = Saturday)
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        businessDaysToAdd--;
+      }
+    }
+    
     const responseDateFormatted = responseDate.toLocaleDateString('fr-FR', { 
       weekday: 'long', 
       day: 'numeric', 
@@ -647,6 +660,12 @@ export function CheckInForm({ urlParams, webhookUrl }: CheckInFormProps = {}) {
       body: ""
     };
 
+    // ===== GÉNÉRATION EMAIL ACCOUNT MANAGER (HTML) =====
+    let emailAM = {
+      subject: "",
+      body: ""
+    };
+
     if (isBloquant) {
       emailEntreprise = {
         subject: `Action requise – Blocage critique détecté avec ${talentName}`,
@@ -746,6 +765,81 @@ export function CheckInForm({ urlParams, webhookUrl }: CheckInFormProps = {}) {
               <p style="margin: 0 0 5px 0; font-size: 16px; color: #374151;">Cordialement,</p>
               <p style="margin: 0 0 5px 0; font-size: 16px; font-weight: 600; color: #1f2937;">L'équipe Talio</p>
               <p style="margin: 0; font-size: 14px; color: #6b7280;">csm@taliotalent.com</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+      };
+
+      // Email AM pour blocage critique
+      emailAM = {
+        subject: `🚨 URGENT – Blocage critique chez ${entrepriseName} (${talentName})`,
+        body: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f5f5;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <tr>
+            <td style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #ffffff;">🚨 Blocage critique détecté</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px 30px;">
+              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #374151;">Bonjour <strong>${accountManagerName}</strong>,</p>
+              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #374151;">
+                Le retour du check-in J+14 de <strong>${entrepriseName}</strong> sur la mission de <strong>${talentName}</strong> révèle un <strong>blocage critique</strong> qui nécessite une action immédiate.
+              </p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0; background-color: #fee2e2; border-left: 4px solid #dc2626; border-radius: 4px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #7f1d1d;">🔴 Contexte du blocage</h3>
+                    ${formData.sujetPrincipal ? `<p style="margin: 0 0 10px 0; font-size: 14px; line-height: 20px; color: #7f1d1d;"><strong>Sujet:</strong> ${formData.sujetPrincipal}</p>` : ''}
+                    <p style="margin: 0; font-size: 14px; line-height: 20px; color: #7f1d1d;"><strong>Description:</strong> ${formData.contexteBlocage}</p>
+                  </td>
+                </tr>
+              </table>
+              <h3 style="margin: 30px 0 15px 0; font-size: 18px; font-weight: 600; color: #1f2937;">📊 Health Score: ${healthScore}/100 ${healthEmoji}</h3>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 30px;">
+                <tr><td style="padding: 8px 0; font-size: 14px; color: #6b7280;">• Démarrage : <strong>${demarrageScore}/5</strong> ${isDemarrageWeak ? '🔴' : ''}</td></tr>
+                <tr><td style="padding: 8px 0; font-size: 14px; color: #6b7280;">• Clarté du brief : <strong>${clarteScore}/5</strong> ${isClarteWeak ? '🔴' : ''}</td></tr>
+                <tr><td style="padding: 8px 0; font-size: 14px; color: #6b7280;">• Collaboration : <strong>${collaborationScore}/5</strong> ${isCollaborationWeak ? '🔴' : ''}</td></tr>
+                <tr><td style="padding: 8px 0; font-size: 14px; color: #6b7280;">• Engagement : <strong>${engagementScore}/5</strong> ${isEngagementWeak ? '🔴' : ''}</td></tr>
+                <tr><td style="padding: 8px 0; font-size: 14px; color: #6b7280;">• Accès & outils : <strong>${formData.acces}</strong> ${isCriticalAccess ? '🔴' : ''}</td></tr>
+                <tr><td style="padding: 8px 0; font-size: 14px; color: #6b7280;">• Première livraison : <strong>${formData.premiereLivraison}</strong> ${noLivraison ? '🔴' : ''}</td></tr>
+              </table>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #92400e;">⚡ Actions immédiates requises</h3>
+                    <p style="margin: 0; font-size: 14px; line-height: 20px; color: #92400e;">
+                      1. Contacter ${entrepriseName} sous 24h maximum<br>
+                      2. Call avec ${talentName} pour comprendre sa vision<br>
+                      3. Identifier la source du blocage et plan d'action<br>
+                      4. Débloquer la situation ou escalader si nécessaire
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              ${hasCallRequested ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0; background-color: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 4px;">
+                <tr><td style="padding: 15px 20px;"><p style="margin: 0; font-size: 14px; line-height: 20px; color: #1e40af;">📞 <strong>L'entreprise a demandé un call</strong> – Lien Calendly partagé</p></td></tr>
+              </table>` : ''}
+              <p style="margin: 30px 0 0 0; font-size: 16px; line-height: 24px; color: #374151;">Compte sur toi pour gérer cette situation en priorité 💪</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
+              <p style="margin: 0; font-size: 14px; color: #6b7280;">Check-in J+14 – ${new Date().toLocaleDateString('fr-FR')}</p>
             </td>
           </tr>
         </table>
@@ -871,6 +965,76 @@ export function CheckInForm({ urlParams, webhookUrl }: CheckInFormProps = {}) {
 </body>
 </html>`
       };
+
+      // Email AM pour mission à risque
+      emailAM = {
+        subject: `⚠️ Points d'attention – ${entrepriseName} (${talentName})`,
+        body: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f5f5;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <tr>
+            <td style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #ffffff;">⚠️ Points d'attention détectés</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px 30px;">
+              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #374151;">Bonjour <strong>${accountManagerName}</strong>,</p>
+              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #374151;">Le check-in J+14 de <strong>${entrepriseName}</strong> révèle quelques points d'attention sur la mission de <strong>${talentName}</strong>.</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #92400e;">⚠️ Points faibles identifiés</h3>
+                    ${pointsFaibles.map(p => `<p style="margin: 0 0 5px 0; font-size: 14px; line-height: 20px; color: #92400e;">${p}</p>`).join('')}
+                  </td>
+                </tr>
+              </table>
+              <h3 style="margin: 30px 0 15px 0; font-size: 18px; font-weight: 600; color: #1f2937;">📊 Health Score: ${healthScore}/100 ${healthEmoji}</h3>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 30px;">
+                <tr><td style="padding: 8px 0; font-size: 14px; color: #6b7280;">• Démarrage : <strong>${demarrageScore}/5</strong></td></tr>
+                <tr><td style="padding: 8px 0; font-size: 14px; color: #6b7280;">• Clarté du brief : <strong>${clarteScore}/5</strong></td></tr>
+                <tr><td style="padding: 8px 0; font-size: 14px; color: #6b7280;">• Collaboration : <strong>${collaborationScore}/5</strong></td></tr>
+                <tr><td style="padding: 8px 0; font-size: 14px; color: #6b7280;">• Engagement : <strong>${engagementScore}/5</strong></td></tr>
+                <tr><td style="padding: 8px 0; font-size: 14px; color: #6b7280;">• Accès : <strong>${formData.acces}</strong></td></tr>
+              </table>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #92400e;">💡 Actions recommandées</h3>
+                    <p style="margin: 0; font-size: 14px; line-height: 20px; color: #92400e;">
+                      1. Call avec ${entrepriseName} pour aligner rapidement<br>
+                      2. Comprendre le contexte et débloquer les points d'attention<br>
+                      3. Faire un point avec ${talentName} si nécessaire
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              ${hasCallRequested ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0; background-color: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 4px;">
+                <tr><td style="padding: 15px 20px;"><p style="margin: 0; font-size: 14px; line-height: 20px; color: #1e40af;">📞 <strong>Call demandé</strong> par l'entreprise</p></td></tr>
+              </table>` : ''}
+              <p style="margin: 30px 0 0 0; font-size: 16px; line-height: 24px; color: #374151;">Merci de gérer ça rapidement 👍</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
+              <p style="margin: 0; font-size: 14px; color: #6b7280;">Check-in J+14 – ${new Date().toLocaleDateString('fr-FR')}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+      };
     } else if (isMineur) {
       emailEntreprise = {
         subject: `Check-in J+14 – Axes d'amélioration pour ${talentName}`,
@@ -967,6 +1131,64 @@ export function CheckInForm({ urlParams, webhookUrl }: CheckInFormProps = {}) {
 </body>
 </html>`
       };
+
+      // Email AM pour axes d'amélioration mineurs
+      emailAM = {
+        subject: `📋 Axes d'amélioration – ${entrepriseName} (${talentName})`,
+        body: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f5f5;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <tr>
+            <td style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #ffffff;">📋 Axes d'amélioration identifiés</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px 30px;">
+              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #374151;">Bonjour <strong>${accountManagerName}</strong>,</p>
+              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #374151;">${entrepriseName} a remonté quelques axes d'amélioration mineurs pour <strong>${talentName}</strong> lors du check-in J+14.</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #92400e;">📝 Feedback</h3>
+                    ${formData.sujetPrincipal ? `<p style="margin: 0 0 10px 0; font-size: 14px; line-height: 20px; color: #92400e;"><strong>Sujet:</strong> ${formData.sujetPrincipal}</p>` : ''}
+                    <p style="margin: 0; font-size: 14px; line-height: 20px; color: #92400e;">${formData.axesAmelioration}</p>
+                  </td>
+                </tr>
+              </table>
+              <h3 style="margin: 30px 0 15px 0; font-size: 18px; font-weight: 600; color: #1f2937;">📊 Health Score: ${healthScore}/100 ${healthEmoji}</h3>
+              <p style="margin: 0 0 20px 0; font-size: 14px; color: #6b7280;">Globalement, la mission se passe bien. Ces retours sont constructifs pour aider ${talentName} à progresser.</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0; background-color: #e0f2fe; border-left: 4px solid #0ea5e9; border-radius: 4px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #075985;">💡 À partager avec ${talentName}</h3>
+                    <p style="margin: 0; font-size: 14px; line-height: 20px; color: #075985;">Ces retours peuvent être utiles pour un feedback constructif lors du prochain point.</p>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin: 30px 0 0 0; font-size: 16px; line-height: 24px; color: #374151;">RAS de critique, c'est pour optimiser 👍</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
+              <p style="margin: 0; font-size: 14px; color: #6b7280;">Check-in J+14 – ${new Date().toLocaleDateString('fr-FR')}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+      };
     } else {
       emailEntreprise = {
         subject: `Check-in J+14 – Tout roule avec ${talentName} 🎉`,
@@ -1053,6 +1275,78 @@ export function CheckInForm({ urlParams, webhookUrl }: CheckInFormProps = {}) {
               <p style="margin: 0 0 5px 0; font-size: 16px; color: #374151;">Cordialement,</p>
               <p style="margin: 0 0 5px 0; font-size: 16px; font-weight: 600; color: #1f2937;">L'équipe Talio</p>
               <p style="margin: 0; font-size: 14px; color: #6b7280;">csm@taliotalent.com</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+      };
+
+      // Email AM pour mission OK
+      emailAM = {
+        subject: hasUpsell ? `💡 Upsell potentiel – ${entrepriseName} (${talentName})` : `✅ Mission OK – ${entrepriseName} (${talentName})`,
+        body: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f5f5;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <tr>
+            <td style="background: linear-gradient(135deg, ${hasUpsell ? '#3b82f6 0%, #2563eb 100%' : '#10b981 0%, #059669 100%'}); padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #ffffff;">${hasUpsell ? '💡 Upsell potentiel' : '🎉 Mission OK'}</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px 30px;">
+              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #374151;">Bonjour <strong>${accountManagerName}</strong>,</p>
+              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #374151;">Excellente nouvelle : le check-in J+14 de <strong>${entrepriseName}</strong> sur la mission de <strong>${talentName}</strong> est très positif !</p>
+              <h3 style="margin: 30px 0 15px 0; font-size: 18px; font-weight: 600; color: #1f2937;">📊 Health Score: ${healthScore}/100 ${healthEmoji}</h3>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 30px;">
+                <tr><td style="padding: 8px 0; font-size: 14px; color: #6b7280;">• Démarrage : <strong>${demarrageScore}/5</strong></td></tr>
+                <tr><td style="padding: 8px 0; font-size: 14px; color: #6b7280;">• Clarté : <strong>${clarteScore}/5</strong></td></tr>
+                <tr><td style="padding: 8px 0; font-size: 14px; color: #6b7280;">• Collaboration : <strong>${collaborationScore}/5</strong></td></tr>
+                <tr><td style="padding: 8px 0; font-size: 14px; color: #6b7280;">• Engagement : <strong>${engagementScore}/5</strong></td></tr>
+              </table>
+              ${hasUpsell ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0; background-color: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 4px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #1e40af;">💡 Opportunité upsell détectée</h3>
+                    <p style="margin: 0 0 10px 0; font-size: 14px; line-height: 20px; color: #1e40af;"><strong>Besoin identifié:</strong> "${formData.upsell}"</p>
+                    <p style="margin: 0; font-size: 14px; line-height: 20px; color: #1e40af;">À explorer lors de ton prochain point avec ${entrepriseName}.</p>
+                  </td>
+                </tr>
+              </table>` : `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0; background-color: #d1fae5; border-left: 4px solid #10b981; border-radius: 4px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <p style="margin: 0; font-size: 14px; line-height: 20px; color: #065f46;">✅ Tout roule ! Continue le suivi régulier.</p>
+                  </td>
+                </tr>
+              </table>`}
+              ${hasCallRequested ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0; background-color: #e0f2fe; border-left: 4px solid #0ea5e9; border-radius: 4px;">
+                <tr><td style="padding: 15px 20px;"><p style="margin: 0; font-size: 14px; line-height: 20px; color: #075985;">📞 <strong>Call demandé</strong> par l'entreprise (probablement pour l'upsell ou autre sujet)</p></td></tr>
+              </table>` : ''}
+              ${formData.successStory ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #92400e;">🌟 Success Story potentielle</h3>
+                    <p style="margin: 0; font-size: 14px; line-height: 20px; color: #92400e;">${formData.successStory}</p>
+                  </td>
+                </tr>
+              </table>` : ''}
+              <p style="margin: 30px 0 0 0; font-size: 16px; line-height: 24px; color: #374151;">Continue sur cette lancée ! 🚀</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
+              <p style="margin: 0; font-size: 14px; color: #6b7280;">Check-in J+14 – ${new Date().toLocaleDateString('fr-FR')}</p>
             </td>
           </tr>
         </table>
@@ -1448,6 +1742,7 @@ export function CheckInForm({ urlParams, webhookUrl }: CheckInFormProps = {}) {
     return {
       type: notificationType,
       slackMessage,
+      emailAM,
       emailEntreprise,
       emailTalent
     };
@@ -1569,6 +1864,7 @@ export function CheckInForm({ urlParams, webhookUrl }: CheckInFormProps = {}) {
     console.log("\n=== NOTIFICATIONS GÉNÉRÉES ===");
     console.log("Type:", notifs.type);
     console.log("\nSlack (AM):", notifs.slackMessage);
+    console.log("\nEmail AM:", notifs.emailAM);
     console.log("\nEmail Entreprise:", notifs.emailEntreprise);
     console.log("\nEmail Talent:", notifs.emailTalent);
     
@@ -1593,6 +1889,10 @@ TYPE DE NOTIFICATION: ${notifications.type.toUpperCase()}
 --- SLACK ([Nom du Manager]) ---
 ${notifications.slackMessage}
 
+--- EMAIL ACCOUNT MANAGER ---
+Objet: ${notifications.emailAM.subject}
+${notifications.emailAM.body}
+
 --- EMAIL ENTREPRISE ---
 Objet: ${notifications.emailEntreprise.subject}
 ${notifications.emailEntreprise.body}
@@ -1614,6 +1914,8 @@ ${notifications.emailTalent.body}
     
     if (type === "slack") {
       textToCopy = notifications.slackMessage;
+    } else if (type === "email-am") {
+      textToCopy = `Objet: ${notifications.emailAM.subject}\n\n${notifications.emailAM.body}`;
     } else if (type === "email-entreprise") {
       textToCopy = `Objet: ${notifications.emailEntreprise.subject}\n\n${notifications.emailEntreprise.body}`;
     } else if (type === "email-talent") {
@@ -1650,8 +1952,9 @@ ${notifications.emailTalent.body}
     chargeTravail === "surcharge" ||
     blocage === "oui-bloquant";
 
-  // Check access - hidden parameter must be present
-  if (!urlParams?.hidden) {
+  // Check access - essential URL parameters must be present
+  const hasRequiredParams = urlParams?.contract_id && urlParams?.talent_id && urlParams?.company_id;
+  if (!hasRequiredParams) {
     return (
       <div className="min-h-screen bg-[#FAFAFA]" style={{ fontFamily: 'Inter, sans-serif' }}>
         <div className="max-w-[600px] mx-auto px-4 py-12">
