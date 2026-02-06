@@ -139,6 +139,23 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
     }
   }, [needCall]);
 
+  // Listen for Calendly events to track actual bookings
+  useEffect(() => {
+    const handleCalendlyEvent = (e: MessageEvent) => {
+      if (e.data.event && e.data.event.indexOf('calendly') === 0) {
+        if (e.data.event === 'calendly.event_scheduled') {
+          // User actually completed a booking
+          setCalendlyBooked(true);
+          setShowCalendlyWarning(false);
+          console.log('Calendly booking completed:', e.data.payload);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleCalendlyEvent);
+    return () => window.removeEventListener('message', handleCalendlyEvent);
+  }, []);
+
   const [formSubmitted, setFormSubmitted] = useState(false);
 
   // Handlers avec réinitialisation automatique
@@ -2978,13 +2995,21 @@ ${notifications.emailTalent.body}
                         <button
                           type="button"
                           onClick={() => {
-                            setCalendlyBooked(true);
                             setShowCalendlyWarning(false);
                             // @ts-ignore - Calendly is loaded via script
                             if (window.Calendly) {
+                              // Build prefill parameters
+                              const name = `${urlParams?.company_name || 'Entreprise'} | ${urlParams?.talent_full_name || 'Talent'} - ${urlParams?.jshow || 'J+14'} check-in`;
+                              const email = urlParams?.talent_email || '';
+                              
+                              // Add prefill parameters to Calendly URL
+                              const baseUrl = urlParams?.calendly_link || 'https://calendly.com/alouanihatim01/30min';
+                              const separator = baseUrl.includes('?') ? '&' : '?';
+                              const calendlyUrl = `${baseUrl}${separator}name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
+                              
                               // @ts-ignore
                               window.Calendly.initPopupWidget({
-                                url: urlParams?.calendly_link || 'https://calendly.com/alouanihatim01/30min'
+                                url: calendlyUrl
                               });
                             }
                           }}
