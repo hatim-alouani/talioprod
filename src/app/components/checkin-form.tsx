@@ -35,6 +35,7 @@ interface UrlParams {
   talent_whatsapp_number: string;
   company_id: string;
   company_name: string;
+  company_email: string;
   talent_id: string;
   talent_full_name: string;
   talent_email: string;
