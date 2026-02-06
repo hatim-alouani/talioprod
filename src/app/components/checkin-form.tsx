@@ -1761,6 +1761,17 @@ export function CheckInForm({ urlParams, webhookUrl }: CheckInFormProps = {}) {
       }
       return;
     }
+
+    // Validation for critical blocage - booking required
+    if (blocage === "oui-bloquant" && !calendlyBooked) {
+      setShowCalendlyWarning(true);
+      // Scroll to the blocage section
+      const blocageSection = document.getElementById('blocage-section');
+      if (blocageSection) {
+        blocageSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
     
     // Validation pour la logique conditionnelle
     if (parseInt(demarrage) <= 2 && !detailsDemarrage.trim()) {
@@ -3175,7 +3186,7 @@ ${notifications.emailTalent.body}
             </section>
 
             {/* Section 8 : Blocage / Axes d'amélioration */}
-            <section>
+            <section id="blocage-section">
               <h2 
                 className="mb-6" 
                 style={{ 
@@ -3558,23 +3569,64 @@ ${notifications.emailTalent.body}
                     </div>
 
                     {/* Bouton call direct Calendly */}
-                    <a
-                      href="https://calendly.com/alouanihatim01/30min"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 rounded-lg p-4 transition-shadow hover:shadow-md"
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCalendlyBooked(true);
+                        setShowCalendlyWarning(false);
+                        // @ts-ignore - Calendly is loaded via script
+                        if (window.Calendly) {
+                          // @ts-ignore
+                          window.Calendly.initPopupWidget({
+                            url: urlParams?.calendly_link || 'https://calendly.com/alouanihatim01/30min'
+                          });
+                        }
+                      }}
+                      className="flex items-center justify-center gap-2 rounded-lg p-4 transition-shadow hover:shadow-md w-full"
                       style={{
-                        backgroundColor: '#FF4444',
-                        border: '2px solid #FF0000',
+                        backgroundColor: calendlyBooked ? '#10b981' : '#FF4444',
+                        border: calendlyBooked ? '2px solid #059669' : '2px solid #FF0000',
                         color: '#FFFFFF',
-                        textDecoration: 'none',
                         fontSize: '14px',
-                        fontWeight: 600
+                        fontWeight: 600,
+                        cursor: 'pointer'
                       }}
                     >
-                      <Calendar size={18} />
-                      🚨 Blocage critique - Réserver un call immédiat avec {urlParams?.account_manager_full_name || "votre AM"}
-                    </a>
+                      {calendlyBooked ? (
+                        <>
+                          <Check size={18} />
+                          Créneau réservé ✓
+                        </>
+                      ) : (
+                        <>
+                          <Calendar size={18} />
+                          🚨 Blocage critique - Réserver un call immédiat avec {urlParams?.account_manager_full_name || "votre AM"}
+                        </>
+                      )}
+                    </button>
+
+                    {/* Warning message */}
+                    <AnimatePresence>
+                      {showCalendlyWarning && !calendlyBooked && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="flex items-start gap-2 rounded-lg p-3"
+                          style={{
+                            backgroundColor: '#fef2f2',
+                            border: '1px solid #fca5a5',
+                            marginTop: '12px'
+                          }}
+                        >
+                          <AlertCircle size={18} style={{ color: '#dc2626', flexShrink: 0, marginTop: '2px' }} />
+                          <span style={{ fontSize: '14px', color: '#dc2626', fontWeight: 500 }}>
+                            ⚠️ Blocage critique détecté - Veuillez réserver un call immédiat avec {urlParams?.account_manager_full_name || "votre AM"} avant d'envoyer le formulaire.
+                          </span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
                 )}
               </AnimatePresence>
