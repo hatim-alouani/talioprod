@@ -1499,6 +1499,7 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
     // Préparer les données à envoyer au webhook
     const webhookData = {
       ...urlParams,
+      company_email: urlParams?.company_email,
       form_data: formData,
       notifications: notifs,
       submission_date: new Date().toISOString()

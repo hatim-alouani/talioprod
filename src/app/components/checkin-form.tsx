@@ -1447,7 +1447,9 @@ export function CheckInForm({ urlParams, webhookUrl }: CheckInFormProps = {}) {
           <!-- Footer -->
           <tr>
             <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
-              <p style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">L'équipe Talio</p>
+              <p style="margin: 0 0 5px 0; font-size: 16px; color: #374151;">Cordialement,</p>
+              <p style="margin: 0 0 5px 0; font-size: 16px; font-weight: 600; color: #1f2937;">L'équipe Talio</p>
+              <p style="margin: 0; font-size: 14px; color: #6b7280;">csm@taliotalent.com</p>
             </td>
           </tr>
         </table>
@@ -1552,7 +1554,9 @@ export function CheckInForm({ urlParams, webhookUrl }: CheckInFormProps = {}) {
           <!-- Footer -->
           <tr>
             <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
-              <p style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">L'équipe Talio</p>
+              <p style="margin: 0 0 5px 0; font-size: 16px; color: #374151;">Cordialement,</p>
+              <p style="margin: 0 0 5px 0; font-size: 16px; font-weight: 600; color: #1f2937;">L'équipe Talio</p>
+              <p style="margin: 0; font-size: 14px; color: #6b7280;">csm@taliotalent.com</p>
             </td>
           </tr>
         </table>
@@ -1639,7 +1643,9 @@ export function CheckInForm({ urlParams, webhookUrl }: CheckInFormProps = {}) {
           <!-- Footer -->
           <tr>
             <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
-              <p style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">L'équipe Talio</p>
+              <p style="margin: 0 0 5px 0; font-size: 16px; color: #374151;">Cordialement,</p>
+              <p style="margin: 0 0 5px 0; font-size: 16px; font-weight: 600; color: #1f2937;">L'équipe Talio</p>
+              <p style="margin: 0; font-size: 14px; color: #6b7280;">csm@taliotalent.com</p>
             </td>
           </tr>
         </table>
@@ -1728,7 +1734,9 @@ export function CheckInForm({ urlParams, webhookUrl }: CheckInFormProps = {}) {
           <!-- Footer -->
           <tr>
             <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
-              <p style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">L'équipe Talio</p>
+              <p style="margin: 0 0 5px 0; font-size: 16px; color: #374151;">Cordialement,</p>
+              <p style="margin: 0 0 5px 0; font-size: 16px; font-weight: 600; color: #1f2937;">L'équipe Talio</p>
+              <p style="margin: 0; font-size: 14px; color: #6b7280;">csm@taliotalent.com</p>
             </td>
           </tr>
         </table>
@@ -1848,6 +1856,7 @@ export function CheckInForm({ urlParams, webhookUrl }: CheckInFormProps = {}) {
     // Préparer les données à envoyer au webhook
     const webhookData = {
       ...urlParams,
+      company_email: urlParams?.company_email,
       form_data: formData,
       notifications: notifs,
       submission_date: new Date().toISOString()

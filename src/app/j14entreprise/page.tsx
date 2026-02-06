@@ -13,6 +13,7 @@ function J14EntrepriseContent() {
     talent_whatsapp_number: searchParams.get('talent_whatsapp_number') || '',
     company_id: searchParams.get('company_id') || '',
     company_name: searchParams.get('company_name') || '[Entreprise]',
+    company_email: searchParams.get('company_email') || '',
     talent_id: searchParams.get('talent_id') || '',
     talent_full_name: searchParams.get('talent_full_name') || 'Nadia Berrada',
     talent_email: searchParams.get('talent_email') || '',
