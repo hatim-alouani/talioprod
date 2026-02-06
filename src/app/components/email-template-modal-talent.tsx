@@ -50,7 +50,7 @@ Si quelque chose ne va pas, n'hésite pas — on est là pour t'aider ! 💪
 
 Merci et excellente journée !
 
-${amName} — L'équipe Talio
+Cordialement,
 csm@taliotalent.com
 www.taliotalent.com
 

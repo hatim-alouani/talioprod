@@ -97,6 +97,9 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
   const [showEmailTemplate, setShowEmailTemplate] = useState(false);
   const [copiedState, setCopiedState] = useState<"slack" | "email-am" | "email-entreprise" | "email-talent" | null>(null);
   const [formLink, setFormLink] = useState("");
+  const [submittedHealthScore, setSubmittedHealthScore] = useState(0);
+  const [submittedHealthColor, setSubmittedHealthColor] = useState("green");
+  const [submittedScenario, setSubmittedScenario] = useState<"critical" | "at-risk" | "mineur" | "check-in-ok">("check-in-ok");
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -299,6 +302,14 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
               <div style="font-family:Arial, Helvetica, sans-serif;color:#1f2937;font-size:16px;line-height:26px;">
                 ${body}
               </div>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
+              <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">Cordialement,</p>
+              <p style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600; color: #111827;">L'équipe Talio</p>
+              <p style="margin: 0;"><a href="mailto:csm@taliotalent.com" style="font-size: 14px; color: #2563eb; text-decoration: none;">csm@taliotalent.com</a></p>
             </td>
           </tr>
         </table>
@@ -554,10 +565,15 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                   Nous restons à votre disposition pour faciliter cette collaboration. N'hésitez pas si vous souhaitez
                   un point avec nous.
                 </p>
-                <p style="margin:0 0 8px 0;">Cordialement,</p>
-                <p style="margin:0 0 4px 0;"><strong>L'équipe Talio</strong></p>
-                <p style="margin:0;color:#6b7280;">csm@taliotalent.com</p>
               </div>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
+              <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">Cordialement,</p>
+              <p style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600; color: #111827;">L'équipe Talio</p>
+              <p style="margin: 0;"><a href="mailto:csm@taliotalent.com" style="font-size: 14px; color: #2563eb; text-decoration: none;">csm@taliotalent.com</a></p>
             </td>
           </tr>
         </table>
@@ -620,10 +636,15 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                     </td>
                   </tr>
                 </table>` : ''}
-                <p style="margin:0 0 8px 0;">Cordialement,</p>
-                <p style="margin:0 0 4px 0;"><strong>L'équipe Talio</strong></p>
-                <p style="margin:0;color:#6b7280;font-size:14px;">csm@taliotalent.com</p>
               </div>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
+              <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">Cordialement,</p>
+              <p style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600; color: #111827;">L'équipe Talio</p>
+              <p style="margin: 0;"><a href="mailto:csm@taliotalent.com" style="font-size: 14px; color: #2563eb; text-decoration: none;">csm@taliotalent.com</a></p>
             </td>
           </tr>
         </table>
@@ -825,10 +846,15 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                     </td>
                   </tr>
                 </table>
-                <p style="margin:0 0 8px 0;">Cordialement,</p>
-                <p style="margin:0 0 4px 0;"><strong>L'équipe Talio</strong></p>
-                <p style="margin:0;color:#6b7280;">csm@taliotalent.com</p>
               </div>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
+              <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">Cordialement,</p>
+              <p style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600; color: #111827;">L'équipe Talio</p>
+              <p style="margin: 0;"><a href="mailto:csm@taliotalent.com" style="font-size: 14px; color: #2563eb; text-decoration: none;">csm@taliotalent.com</a></p>
             </td>
           </tr>
         </table>
@@ -868,10 +894,15 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                 <p style="margin:0 0 16px 0;">
                   Je reviens vers toi prochainement pour en discuter.
                 </p>
-                <p style="margin:0 0 8px 0;">Cordialement,</p>
-                <p style="margin:0 0 4px 0;"><strong>L'équipe Talio</strong></p>
-                <p style="margin:0;color:#6b7280;font-size:14px;">csm@taliotalent.com</p>
               </div>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
+              <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">Cordialement,</p>
+              <p style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600; color: #111827;">L'équipe Talio</p>
+              <p style="margin: 0;"><a href="mailto:csm@taliotalent.com" style="font-size: 14px; color: #2563eb; text-decoration: none;">csm@taliotalent.com</a></p>
             </td>
           </tr>
         </table>
@@ -1112,10 +1143,15 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                   Rien d'alarmant, juste des ajustements classiques de démarrage. N'hésitez pas si vous souhaitez
                   échanger avec nous.
                 </p>
-                <p style="margin:0 0 8px 0;">Cordialement,</p>
-                <p style="margin:0 0 4px 0;"><strong>L'équipe Talio</strong></p>
-                <p style="margin:0;color:#6b7280;">csm@taliotalent.com</p>
               </div>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
+              <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">Cordialement,</p>
+              <p style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600; color: #111827;">L'équipe Talio</p>
+              <p style="margin: 0;"><a href="mailto:csm@taliotalent.com" style="font-size: 14px; color: #2563eb; text-decoration: none;">csm@taliotalent.com</a></p>
             </td>
           </tr>
         </table>
@@ -1170,10 +1206,15 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                 <p style="margin:0 0 16px 0;">
                   N'hésite pas à me tenir au courant si d'autres points émergent.
                 </p>
-                <p style="margin:0 0 8px 0;">Cordialement,</p>
-                <p style="margin:0 0 4px 0;"><strong>L'équipe Talio</strong></p>
-                <p style="margin:0;color:#6b7280;font-size:14px;">csm@taliotalent.com</p>
               </div>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
+              <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">Cordialement,</p>
+              <p style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600; color: #111827;">L'équipe Talio</p>
+              <p style="margin: 0;"><a href="mailto:csm@taliotalent.com" style="font-size: 14px; color: #2563eb; text-decoration: none;">csm@taliotalent.com</a></p>
             </td>
           </tr>
         </table>
@@ -1286,7 +1327,6 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                   <strong>Aucune action nécessaire</strong> — la collaboration démarre sur de bonnes bases ! 🚀
                 </p>
                 <p style="margin:0 0 16px 0;">Prochain check-in dans quelques semaines.</p>
-                <p style="margin:0 0 14px 0;">Système Check-in Talio</p>
               `,
               'linear-gradient(90deg,#22c55e 0%, #10b981 100%)',
               '✅'
@@ -1365,9 +1405,15 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                   Merci pour cette collaboration réussie — c'est exactement ce qu'on vise avec chaque mission
                   Talio ! 🚀
                 </p>
-                <p style="margin:0 0 4px 0;"><strong>${amName}</strong> — Talio</p>
-                <p style="margin:0;color:#6b7280;">csm@taliotalent.com</p>
               </div>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
+              <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">Cordialement,</p>
+              <p style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600; color: #111827;">L'équipe Talio</p>
+              <p style="margin: 0;"><a href="mailto:csm@taliotalent.com" style="font-size: 14px; color: #2563eb; text-decoration: none;">csm@taliotalent.com</a></p>
             </td>
           </tr>
         </table>
@@ -1403,10 +1449,15 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
                 <p style="margin:0 0 16px 0;">
                   On reste dispo si tu as besoin, et on se recontacte dans quelques semaines pour le prochain check-in.
                 </p>
-                <p style="margin:0 0 8px 0;">Cordialement,</p>
-                <p style="margin:0 0 4px 0;"><strong>L'équipe Talio</strong></p>
-                <p style="margin:0;color:#6b7280;font-size:14px;">csm@taliotalent.com</p>
               </div>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-radius: 0 0 8px 8px;">
+              <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">Cordialement,</p>
+              <p style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600; color: #111827;">L'équipe Talio</p>
+              <p style="margin: 0;"><a href="mailto:csm@taliotalent.com" style="font-size: 14px; color: #2563eb; text-decoration: none;">csm@taliotalent.com</a></p>
             </td>
           </tr>
         </table>
@@ -1529,6 +1580,73 @@ export function CheckInFormTalent({ urlParams, webhookUrl }: CheckInFormTalentPr
     console.log("\nSlack:", notifs.slackMessage);
     console.log("\nEmail AM:", notifs.emailAM);
     console.log("\nEmail Talent:", notifs.emailTalent);
+    
+    // Calculate health score for the modal
+    const calculateHealthScore = (data: any) => {
+      let score = 0;
+      
+      // 1. Ressenti global: 20 points max
+      const ressentiFeelingValue = parseInt(data.overallFeeling);
+      const ressentiPoints = ressentiFeelingValue === 5 ? 20 : ressentiFeelingValue === 4 ? 15 : ressentiFeelingValue === 3 ? 10 : ressentiFeelingValue === 2 ? 5 : 0;
+      score += ressentiPoints;
+      
+      // 2. Clarté du scope: 15 points max
+      const scopeValue = parseInt(data.scopeClarity);
+      const scopePoints = scopeValue === 5 ? 15 : scopeValue === 4 ? 12 : scopeValue === 3 ? 8 : scopeValue === 2 ? 4 : 0;
+      score += scopePoints;
+      
+      // 3. Communication client: 15 points max
+      const commValue = parseInt(data.clientCommunication);
+      const commPoints = commValue === 5 ? 15 : commValue === 4 ? 12 : commValue === 3 ? 8 : commValue === 2 ? 4 : 0;
+      score += commPoints;
+      
+      // 4. Accès & Outils: 15 points max
+      const accesPoints = data.accessStatus === "oui" ? 15 : data.accessStatus === "partiel" ? 8 : 0;
+      score += accesPoints;
+      
+      // 5. Première livraison: 15 points max
+      const livraisonPoints = data.firstDeliveryStatus === "oui" ? 15 : data.firstDeliveryStatus === "en-cours" ? 9 : 0;
+      score += livraisonPoints;
+      
+      // 6. Charge de travail: 10 points max
+      const chargePoints = data.workloadStatus === "equilibree" ? 10 : data.workloadStatus === "trop-faible" ? 6 : 0;
+      score += chargePoints;
+      
+      // 7. Risque court terme: 10 points max
+      const risquePoints = data.shortTermRisk === "non" ? 10 : data.shortTermRisk === "oui-mineur" ? 4 : 0;
+      score += risquePoints;
+      
+      return Math.round(score);
+    };
+    
+    const healthScore = calculateHealthScore(formData);
+    const healthColor = healthScore >= 70 ? "green" : healthScore >= 50 ? "yellow" : "red";
+    
+    // Determine scenario
+    const isCritical = shortTermRisk === "oui-bloquant";
+    const isMineur = shortTermRisk === "oui-mineur";
+    const isFeelingWeak = parseInt(overallFeeling) <= 2;
+    const isScopeWeak = parseInt(scopeClarity) <= 2;
+    const isCommWeak = parseInt(clientCommunication) <= 2;
+    const isCriticalAccess = accessStatus === "non";
+    const noLivraison = firstDeliveryStatus === "non";
+    const isSurcharge = workloadStatus === "trop-elevee";
+    
+    const isAtRisk = isFeelingWeak || isScopeWeak || isCommWeak || isCriticalAccess || noLivraison || isSurcharge || isCritical;
+    
+    let scenario: "critical" | "at-risk" | "mineur" | "check-in-ok" = "check-in-ok";
+    if (isCritical) {
+      scenario = "critical";
+    } else if (isAtRisk) {
+      scenario = "at-risk";
+    } else if (isMineur) {
+      scenario = "mineur";
+    }
+    
+    // Store for modal
+    setSubmittedHealthScore(healthScore);
+    setSubmittedHealthColor(healthColor);
+    setSubmittedScenario(scenario);
     
     // Afficher le message de confirmation
     setFormSubmitted(true);
@@ -3417,7 +3535,11 @@ ${notifications.emailTalent.body}
                 {/* Header avec gradient */}
                 <div 
                   style={{
-                    background: 'linear-gradient(135deg, #0055FF 0%, #00CC88 100%)',
+                    background: submittedHealthColor === "red" 
+                      ? 'linear-gradient(135deg, #DC2626 0%, #EF4444 100%)'
+                      : submittedHealthColor === "yellow"
+                      ? 'linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)'
+                      : 'linear-gradient(135deg, #10B981 0%, #34D399 100%)',
                     padding: '32px 24px',
                     position: 'relative'
                   }}
@@ -3462,7 +3584,10 @@ ${notifications.emailTalent.body}
                         boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)'
                       }}
                     >
-                      <Check size={48} style={{ color: '#00CC88', strokeWidth: 3 }} />
+                      <Check size={48} style={{ 
+                        color: submittedHealthColor === "red" ? '#DC2626' : submittedHealthColor === "yellow" ? '#F59E0B' : '#10B981',
+                        strokeWidth: 3 
+                      }} />
                     </div>
                   </motion.div>
 
@@ -3474,7 +3599,10 @@ ${notifications.emailTalent.body}
                     marginBottom: '8px',
                     letterSpacing: '-0.5px'
                   }}>
-                    Check-in enregistré ! 🎉
+                    {submittedScenario === "critical" ? "🚨 Check-in critique enregistré"
+                      : submittedScenario === "at-risk" ? "⚠️ Check-in enregistré"
+                      : submittedScenario === "mineur" ? "✅ Check-in enregistré"
+                      : "🎉 Check-in enregistré !"}
                   </h2>
                   
                   <p style={{ 
@@ -3482,7 +3610,13 @@ ${notifications.emailTalent.body}
                     color: 'rgba(255, 255, 255, 0.9)',
                     lineHeight: '1.5'
                   }}>
-                    Merci pour ton retour {urlParams?.talent_full_name?.split(' ')[0] || ''}
+                    {submittedScenario === "critical" 
+                      ? "Nous traitons ce dossier en priorité absolue"
+                      : submittedScenario === "at-risk" 
+                      ? "Ton retour est précieux, nous allons agir rapidement"
+                      : submittedScenario === "mineur"
+                      ? "Merci pour ton retour, nous allons ajuster ces petits points"
+                      : `Merci pour ton retour ${urlParams?.talent_full_name?.split(' ')[0] || ''} ! (Health Score : ${submittedHealthScore}/100)`}
                   </p>
                 </div>
 
@@ -3506,8 +3640,8 @@ ${notifications.emailTalent.body}
                         width: '24px',
                         height: '24px',
                         borderRadius: '50%',
-                        backgroundColor: '#E8F0FE',
-                        color: '#0055FF',
+                        backgroundColor: submittedHealthColor === "red" ? '#FEE2E2' : submittedHealthColor === "yellow" ? '#FEF3C7' : '#D1FAE5',
+                        color: submittedHealthColor === "red" ? '#DC2626' : submittedHealthColor === "yellow" ? '#F59E0B' : '#10B981',
                         fontSize: '14px',
                         fontWeight: 700
                       }}>✓</span>
@@ -3542,16 +3676,26 @@ ${notifications.emailTalent.body}
                           gap: '12px',
                           alignItems: 'flex-start',
                           padding: '12px',
-                          backgroundColor: '#E8F0FE',
+                          backgroundColor: submittedHealthColor === "red" ? '#FEE2E2' : submittedHealthColor === "yellow" ? '#FEF3C7' : '#D1FAE5',
                           borderRadius: '8px',
-                          border: '1px solid #0055FF'
+                          border: `1px solid ${submittedHealthColor === "red" ? '#DC2626' : submittedHealthColor === "yellow" ? '#F59E0B' : '#10B981'}`
                         }}>
                           <span style={{ fontSize: '20px', lineHeight: '1' }}>📞</span>
                           <div style={{ flex: 1, textAlign: 'left' }}>
-                            <p style={{ fontSize: '14px', fontWeight: 600, color: '#0055FF', margin: '0 0 4px 0' }}>
-                              Call programmé
+                            <p style={{ 
+                              fontSize: '14px', 
+                              fontWeight: 600, 
+                              color: submittedHealthColor === "red" ? '#DC2626' : submittedHealthColor === "yellow" ? '#F59E0B' : '#10B981',
+                              margin: '0 0 4px 0' 
+                            }}>
+                              {submittedScenario === "critical" ? "🚨 Call urgent programmé" : "Call programmé"}
                             </p>
-                            <p style={{ fontSize: '13px', color: '#0055FF', margin: 0, lineHeight: '1.4' }}>
+                            <p style={{ 
+                              fontSize: '13px', 
+                              color: submittedHealthColor === "red" ? '#DC2626' : submittedHealthColor === "yellow" ? '#F59E0B' : '#10B981',
+                              margin: 0, 
+                              lineHeight: '1.4' 
+                            }}>
                               {urlParams?.account_manager_full_name || 'Ton AM'} te contactera selon le créneau réservé
                             </p>
                           </div>
@@ -3564,17 +3708,30 @@ ${notifications.emailTalent.body}
                         gap: '12px',
                         alignItems: 'flex-start',
                         padding: '12px',
-                        backgroundColor: '#F8FAFC',
+                        backgroundColor: submittedScenario === "critical" ? '#FEE2E2' : '#F8FAFC',
                         borderRadius: '8px',
-                        border: '1px solid #E0E0E0'
+                        border: submittedScenario === "critical" ? '1px solid #DC2626' : '1px solid #E0E0E0'
                       }}>
                         <span style={{ fontSize: '20px', lineHeight: '1' }}>⏰</span>
                         <div style={{ flex: 1, textAlign: 'left' }}>
-                          <p style={{ fontSize: '14px', fontWeight: 600, color: '#111111', margin: '0 0 4px 0' }}>
-                            Suivi sous 48h max
+                          <p style={{ 
+                            fontSize: '14px', 
+                            fontWeight: 600, 
+                            color: submittedScenario === "critical" ? '#DC2626' : '#111111',
+                            margin: '0 0 4px 0' 
+                          }}>
+                            {submittedScenario === "critical" ? "⚡ Action immédiate" : "Suivi sous 48h max"}
                           </p>
-                          <p style={{ fontSize: '13px', color: '#666666', margin: 0, lineHeight: '1.4' }}>
-                            {urlParams?.account_manager_full_name || 'Ton AM'} reviendra vers toi d'ici <strong style={{ color: '#0055FF' }}>mercredi prochain</strong>
+                          <p style={{ 
+                            fontSize: '13px', 
+                            color: submittedScenario === "critical" ? '#DC2626' : '#666666',
+                            margin: 0, 
+                            lineHeight: '1.4' 
+                          }}>
+                            {submittedScenario === "critical" 
+                              ? `${urlParams?.account_manager_full_name || 'Ton AM'} reviendra vers toi dès aujourd'hui`
+                              : `${urlParams?.account_manager_full_name || 'Ton AM'} reviendra vers toi d'ici `}
+                            {submittedScenario !== "critical" && <strong style={{ color: submittedHealthColor === "red" ? '#DC2626' : submittedHealthColor === "yellow" ? '#F59E0B' : '#10B981' }}>mercredi prochain</strong>}
                           </p>
                         </div>
                       </div>
@@ -3589,13 +3746,17 @@ ${notifications.emailTalent.body}
                       gap: '8px',
                       padding: '10px 16px',
                       borderRadius: '100px',
-                      backgroundColor: '#FFF7ED',
-                      border: '1px solid #FED7AA',
+                      backgroundColor: submittedHealthColor === "red" ? '#FEE2E2' : submittedHealthColor === "yellow" ? '#FEF3C7' : '#D1FAE5',
+                      border: `1px solid ${submittedHealthColor === "red" ? '#FCA5A5' : submittedHealthColor === "yellow" ? '#FDE68A' : '#A7F3D0'}`,
                       marginBottom: '24px'
                     }}
                   >
-                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#EA580C' }}>
-                      ⚡ SLA Talio : Réponse garantie sous 48h
+                    <span style={{ 
+                      fontSize: '14px', 
+                      fontWeight: 600, 
+                      color: submittedHealthColor === "red" ? '#DC2626' : submittedHealthColor === "yellow" ? '#F59E0B' : '#10B981'
+                    }}>
+                      {submittedScenario === "critical" ? "🚨 Traitement prioritaire immédiat" : "⚡ SLA Talio : Réponse garantie sous 48h"}
                     </span>
                   </div>
 
@@ -3605,7 +3766,7 @@ ${notifications.emailTalent.body}
                     style={{
                       width: '100%',
                       padding: '14px 24px',
-                      backgroundColor: '#0055FF',
+                      backgroundColor: submittedHealthColor === "red" ? '#DC2626' : submittedHealthColor === "yellow" ? '#F59E0B' : '#10B981',
                       color: '#FFFFFF',
                       border: 'none',
                       borderRadius: '8px',
@@ -3613,17 +3774,29 @@ ${notifications.emailTalent.body}
                       fontWeight: 600,
                       cursor: 'pointer',
                       transition: 'all 0.2s',
-                      boxShadow: '0 4px 6px rgba(0, 85, 255, 0.2)'
+                      boxShadow: submittedHealthColor === "red" 
+                        ? '0 4px 6px rgba(220, 38, 38, 0.2)' 
+                        : submittedHealthColor === "yellow"
+                        ? '0 4px 6px rgba(245, 158, 11, 0.2)'
+                        : '0 4px 6px rgba(16, 185, 129, 0.2)'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#0044CC';
+                      e.currentTarget.style.backgroundColor = submittedHealthColor === "red" ? '#B91C1C' : submittedHealthColor === "yellow" ? '#D97706' : '#059669';
                       e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.boxShadow = '0 6px 12px rgba(0, 85, 255, 0.3)';
+                      e.currentTarget.style.boxShadow = submittedHealthColor === "red" 
+                        ? '0 6px 12px rgba(220, 38, 38, 0.3)'
+                        : submittedHealthColor === "yellow"
+                        ? '0 6px 12px rgba(245, 158, 11, 0.3)'
+                        : '0 6px 12px rgba(16, 185, 129, 0.3)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#0055FF';
+                      e.currentTarget.style.backgroundColor = submittedHealthColor === "red" ? '#DC2626' : submittedHealthColor === "yellow" ? '#F59E0B' : '#10B981';
                       e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 85, 255, 0.2)';
+                      e.currentTarget.style.boxShadow = submittedHealthColor === "red" 
+                        ? '0 4px 6px rgba(220, 38, 38, 0.2)'
+                        : submittedHealthColor === "yellow"
+                        ? '0 4px 6px rgba(245, 158, 11, 0.2)'
+                        : '0 4px 6px rgba(16, 185, 129, 0.2)';
                     }}
                   >
                     Fermer
